@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+	<meta charset="UTF-8">
+	<title>Креститки - нолики</title>
+</head>
+
+<body>
+
+	<script type="text/javascript">
+		var map = [[]]; // инициализируем двумерный массив для карты
+		var SIZE = 10; // размер игрового поля
+		var DOTS_TO_WIN = 4; // точек для выигрыша
+		var DOT_EMPTY = '•';
+		var DOT_X = 'X';
+		var DOT_0 = '0';
+		var rand; // для случайных значений координат
+		// var rand = min + Math.floor(Math.random() * (max + 1 - min));
+		var xAI; // координаты для хода ИИ
+		var yAI;
+
+		//---------------------------главный метод
+		initMap();
+		printMap();
+
+		//---------------------------функции	
+		function initMap() {
+			map = new Array(SIZE);
+			for (var i = 0; i < map.length; i++) map[i] = new Array(SIZE); // инициализируем map нужного размера
+			for ( var i = 0; i < SIZE; i++) {
+				for ( var j = 0; j < SIZE; j++) {
+					map[i][j] = DOT_EMPTY;
+				}
+			}
+		}
+		//-----------------------------------
+		function printMap() {
+		for (var i = 0; i <= SIZE; i++) {
+			document.write(" ", i);
+		}
+		document.write("<br\/>");
+		for (var i = 0; i < SIZE; i++) {
+			document.write(" ", (i+1));
+			for (var j = 0; j < SIZE; j++) {
+				document.write(" " + map[i][j] + " ");
+			}
+			document.write("<br\/>");
+		}
+		document.write("<br\/>");	
+		}
+		
+	</script>
+
+</body>
+
+</html>

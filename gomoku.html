@@ -4,13 +4,15 @@
 <head>
 	<meta charset="UTF-8">
 	<title>Креститки - нолики</title>
+	<script src="sprintf.js"></script>
+	<link rel="stylesheet" href="styles/gomoku.css">
 </head>
 
 <body>
-
+	
 	<script type="text/javascript">
 		var map = [[]]; // инициализируем двумерный массив для карты
-		var SIZE = 10; // размер игрового поля
+		var SIZE = 20; // размер игрового поля
 		var DOTS_TO_WIN = 4; // точек для выигрыша
 		var DOT_EMPTY = '•';
 		var DOT_X = 'X';
@@ -37,13 +39,13 @@
 		//-----------------------------------
 		function printMap() {
 		for (var i = 0; i <= SIZE; i++) {
-			document.write(" ", i);
+			document.write(sprintf("&nbsp%2d", i));
 		}
 		document.write("<br\/>");
 		for (var i = 0; i < SIZE; i++) {
-			document.write(" ", (i+1));
+			document.write(sprintf("&nbsp%2d", i+1));
 			for (var j = 0; j < SIZE; j++) {
-				document.write(" " + map[i][j] + " ");
+				document.write(sprintf("&nbsp%2s", map[i][j]));
 			}
 			document.write("<br\/>");
 		}

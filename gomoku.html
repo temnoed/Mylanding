@@ -6,14 +6,11 @@
 	<title>Креститки - нолики</title>
 	<script src="sprintf.js"></script>
 	<link rel="stylesheet" href="styles/gomoku.css">
-</head>
 
-<body>
-	
 	<script type="text/javascript">
 		var map = [[]]; // инициализируем двумерный массив для карты
-		var SIZE = 20; // размер игрового поля
-		var DOTS_TO_WIN = 4; // точек для выигрыша
+		var SIZE = 10; // размер игрового поля
+		var DOTS_TO_WIN = 3; // точек для выигрыша
 		var DOT_EMPTY = '•';
 		var DOT_X = 'X';
 		var DOT_0 = '0';
@@ -21,38 +18,90 @@
 		// var rand = min + Math.floor(Math.random() * (max + 1 - min));
 		var xAI; // координаты для хода ИИ
 		var yAI;
+		var strAnswer = '';
 
 		//---------------------------главный метод
-		initMap();
-		printMap();
+
+
+//		initMap();
+//		printMap();
+
+		
+//		document.write("Игра закончена");
+
 
 		//---------------------------функции	
 		function initMap() {
 			map = new Array(SIZE);
 			for (var i = 0; i < map.length; i++) map[i] = new Array(SIZE); // инициализируем map нужного размера
-			for ( var i = 0; i < SIZE; i++) {
-				for ( var j = 0; j < SIZE; j++) {
+			for (var i = 0; i < SIZE; i++) {
+				for (var j = 0; j < SIZE; j++) {
 					map[i][j] = DOT_EMPTY;
 				}
 			}
 		}
 		//-----------------------------------
 		function printMap() {
-		for (var i = 0; i <= SIZE; i++) {
-			document.write(sprintf("&nbsp%2d", i));
-		}
-		document.write("<br\/>");
-		for (var i = 0; i < SIZE; i++) {
-			document.write(sprintf("&nbsp%2d", i+1));
-			for (var j = 0; j < SIZE; j++) {
-				document.write(sprintf("&nbsp%2s", map[i][j]));
+			strMap = '';
+			for (var i = 0; i <= SIZE; i++) {
+				strMap += sprintf("&nbsp%2d", i);
 			}
-			document.write("<br\/>");
+			strMap += ("<br\/>");
+
+			for (var i = 0; i < SIZE; i++) {
+				strMap += sprintf("&nbsp%2d", i + 1)
+
+				for (var j = 0; j < SIZE; j++) {
+					strMap += sprintf("&nbsp%2s", map[i][j]);
+
+				}
+				strMap += ("<br\/>");
+			}
+			strMap += ("<br\/>");
+			document.getElementById('mydiv').innerHTML=strMap;
+			
 		}
-		document.write("<br\/>");	
+		//------------------------------------
+		function getHumanStroke() {
+			var x, y;
+
+			do {
+
+
+				x = +(strAnswer.split(' ')[0]) - 1;
+				y = +(strAnswer.split(' ')[1]) - 1;
+			} while (!isCellValid(x, y));
+			map[y][x] = DOT_X;
 		}
-		
+		//---------------------------------
+		function isCellValid(x, y) {
+			if (x < 0 || x >= SIZE || y < 0 || y >= SIZE) return false;
+			if (map[y][x] == DOT_EMPTY) return true;
+			return false;
+		}
+		//---------------------------------
+		function getAnswer() {
+			strAnswer = document.getElementById("answer").value;
+			getHumanStroke();
+			printMap();
+		}
 	</script>
+
+
+</head>
+
+<body>
+
+	<div id="mydiv">
+	</div>
+	<script>
+		initMap();
+		printMap();
+	</script>
+	<br>
+	<input type="text" id="answer">
+	<br>
+	<a href="#" onclick="getAnswer();">Отправить</a>
 
 </body>
 

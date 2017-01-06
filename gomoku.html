@@ -11,26 +11,14 @@
 		var map = [[]]; // инициализируем двумерный массив для карты
 		var SIZE = 10; // размер игрового поля
 		var DOTS_TO_WIN = 3; // точек для выигрыша
-		var DOT_EMPTY = '•';
-		var DOT_X = 'X';
-		var DOT_0 = '0';
-		var rand; // для случайных значений координат
-		// var rand = min + Math.floor(Math.random() * (max + 1 - min));
+		var DOT_EMPTY = '.';
+		var DOT_X = '\u2663';
+		var DOT_0 = '\u2661';
 		var xAI; // координаты для хода ИИ
 		var yAI;
 		var strAnswer = '';
 
-		//---------------------------главный метод
-
-
-//		initMap();
-//		printMap();
-
-		
-//		document.write("Игра закончена");
-
-
-		//---------------------------функции	
+		//---------------------------
 		function initMap() {
 			map = new Array(SIZE);
 			for (var i = 0; i < map.length; i++) map[i] = new Array(SIZE); // инициализируем map нужного размера
@@ -58,50 +46,228 @@
 				strMap += ("<br\/>");
 			}
 			strMap += ("<br\/>");
-			document.getElementById('mydiv').innerHTML=strMap;
-			
+			document.getElementById('mydiv').innerHTML = strMap;
+
 		}
 		//------------------------------------
-		function getHumanStroke() {
-			var x, y;
-
-			do {
-
-
-				x = +(strAnswer.split(' ')[0]) - 1;
-				y = +(strAnswer.split(' ')[1]) - 1;
-			} while (!isCellValid(x, y));
+		function getHumanStroke(x, y) {
 			map[y][x] = DOT_X;
 		}
+		//-------------------------------
+		// ищем куда бы сходить компьютеру
+		function seek_Fpoint(symb) {
+			var sumDots = 0;
+			// проверяются горизонтальные палки
+			for (var i = 0; i < SIZE; i++) {
+				for (var j = 0; j <= (SIZE - DOTS_TO_WIN); j++) {
+					sumDots = 0;
+					for (var k = 0; k < DOTS_TO_WIN; k++) {
+						// сканируем в два прохода на длину палки в поисках незанятой выигрышной точки
+						if (map[i][j + k] == symb) sumDots++;
+					}
+					if (sumDots == DOTS_TO_WIN - 1) {
+						for (var k = 0; k < DOTS_TO_WIN; k++) {
+							// второй проход
+							if ((map[i][j + k] == DOT_EMPTY) && isCellValid(j + k, i)) {
+								xAI = j + k + 1;
+								yAI = i + 1;
+								if (xAI >= 0 & yAI >= 0) return true;
+							}
+						}
+					}
+				}
+			}
+
+			// проверяются вертикальные палки
+			for (var i = 0; i <= (SIZE - DOTS_TO_WIN); i++) {
+				for (var j = 0; j < SIZE; j++) {
+					sumDots = 0;
+					for (var k = 0; k < DOTS_TO_WIN; k++) { // сканируем в два прохода на длину палки в поисках незанятой выигрышной точки
+						if (map[i + k][j] == symb) sumDots++;
+					}
+					if (sumDots == DOTS_TO_WIN - 1) {
+						for (var k = 0; k < DOTS_TO_WIN; k++) { // второй проход
+							if ((map[i + k][j] == DOT_EMPTY) && isCellValid(j, i + k)) {
+								xAI = j + 1;
+								yAI = i + k + 1;
+								if (xAI >= 0 & yAI >= 0) return true;
+							}
+						}
+					}
+				}
+			}
+
+			// проверяются диагональные палки
+			for (var i = 0; i <= (SIZE - DOTS_TO_WIN); i++) {
+				for (var j = 0; j <= (SIZE - DOTS_TO_WIN); j++) {
+					sumDots = 0;
+					for (var k = 0; k < DOTS_TO_WIN; k++) {
+						// первый проход по диагональной /
+						if (map[i + k][j + k] == symb) sumDots++;
+					}
+					if (sumDots == DOTS_TO_WIN - 1) {
+						for (var k = 0; k < DOTS_TO_WIN; k++) {
+							// второй проход
+							if ((map[i + k][j + k] == DOT_EMPTY) && isCellValid(j + k, i + k)) {
+								xAI = j + k + 1;
+								yAI = i + k + 1;
+								if (xAI >= 0 & yAI >= 0) return true;
+							}
+						}
+					}
+
+					sumDots = 0;
+					for (var k = 0; k < DOTS_TO_WIN; k++) {
+						// первый проход по диагональной \
+						if (map[i + DOTS_TO_WIN - k - 1][j + k] == symb) sumDots++;
+					}
+					if (sumDots == DOTS_TO_WIN - 1) {
+						for (var k = 0; k < DOTS_TO_WIN; k++) { // второй проход
+							if ((map[i + DOTS_TO_WIN - k - 1][j + k] == DOT_EMPTY) && isCellValid(j + k, i + DOTS_TO_WIN - k - 1)) {
+								xAI = j + k + 1;
+								yAI = i + DOTS_TO_WIN - k;
+								if (xAI >= 0 & yAI >= 0) return true;
+							}
+						}
+					}
+
+				}
+			}
+
+
+			return false;
+
+		}
 		//---------------------------------
+		function aiTurn() {
+			// инициализируем координаты для осмысленного хода ИИ
+			xAI = -1;
+			yAI = -1;
+			// если есть достойный ход для ИИ, ходим
+			if (seek_Fpoint(DOT_X)) {
+				document.getElementById("answer").value = "ИИ походил в: " + xAI + ", " + yAI;
+				map[yAI - 1][xAI - 1] = DOT_0;
+				// иначе, ищем точку случайным образом	
+			} else {
+				do {
+					// случайное целое = min + Math.floor(Math.random() * (max + 1 - min));
+					xAI = 0 + Math.floor(Math.random() * ((SIZE - 1) + 1 - 0));
+					yAI = 0 + Math.floor(Math.random() * ((SIZE - 1) + 1 - 0));
+				} while (!isCellValid(xAI, yAI));
+				document.getElementById("answer").value = "ИИ походил в: " + (xAI + 1) + ", " + (yAI + 1);
+				map[yAI][xAI] = DOT_0;
+			}
+		}
+		//----------------------------------
 		function isCellValid(x, y) {
+			if (isNaN(x) || isNaN(y)) return false;
 			if (x < 0 || x >= SIZE || y < 0 || y >= SIZE) return false;
 			if (map[y][x] == DOT_EMPTY) return true;
 			return false;
 		}
+		//-------------------------------
+		function isMapFull() {
+			for (var i = 0; i < SIZE; i++) {
+				for (var j = 0; j < SIZE; j++) {
+					if (map[i][j] == DOT_EMPTY) return false;
+				}
+			}
+			return true;
+		}
 		//---------------------------------
+		// обработчик нажатия на кнопку
 		function getAnswer() {
+			var x, y;
+
 			strAnswer = document.getElementById("answer").value;
-			getHumanStroke();
+			x = +(strAnswer.split(' ')[0]) - 1;
+			y = +(strAnswer.split(' ')[1]) - 1;
+			if (!isCellValid(x, y)) {
+				document.getElementById("answer").value = "Корректные X Y?";
+				return;
+			}
+			getHumanStroke(x, y);
 			printMap();
+			if (checkWin(DOT_X)) {
+				document.getElementById("answer").value = "Вы победили ^_^";
+				return;
+			}
+			if (isMapFull()) {
+				document.getElementById("answer").value = "Ничья";
+				return;
+			}
+			aiTurn();
+			printMap();
+			if (checkWin(DOT_0)) {
+				document.getElementById("answer").value = "Победил ИИ !+_+!";
+				return;
+			}
+			if (isMapFull()) {
+				document.getElementById("answer").value = "Ничья";
+				return;
+			}
+
+
+		}
+		//---------------------------------
+		function checkWin(symb) {
+			var result;
+			// проверяются горизонтальные палки
+			for (var i = 0; i < SIZE; i++) {
+				for (var j = 0; j <= (SIZE - DOTS_TO_WIN); j++) {
+					result = true;
+					for (var k = 0; k < DOTS_TO_WIN; k++) {
+						if (map[i][j + k] != symb) result = false;
+					}
+					if (result) return true;
+				}
+			}
+			// проверяются вертикальные
+			for (var i = 0; i <= (SIZE - DOTS_TO_WIN); i++) {
+				for (var j = 0; j < SIZE; j++) {
+					result = true;
+					for (var k = 0; k < DOTS_TO_WIN; k++) {
+						if (map[i + k][j] != symb) result = false;
+					}
+					if (result) return true;
+				}
+			}
+			// проверяются диагональные
+			for (var i = 0; i <= (SIZE - DOTS_TO_WIN); i++) {
+				for (var j = 0; j <= (SIZE - DOTS_TO_WIN); j++) {
+					result = true;
+					for (var k = 0; k < DOTS_TO_WIN; k++) {
+						if (map[i + k][j + k] != symb) result = false;
+					}
+					if (result) return true;
+					result = true;
+					for (var k = 0; k < DOTS_TO_WIN; k++) {
+						if (map[i + DOTS_TO_WIN - k - 1][j + k] != symb) result = false;
+					}
+					if (result) return true;
+				}
+			}
+			return false;
 		}
 	</script>
-
 
 </head>
 
 <body>
 
+	<!--оформляем блок для рисования игрового поля-->
 	<div id="mydiv">
 	</div>
+	<!--оформляем интерактивные элементы-->
+	<br> Введите координаты в формате X Y:
+	<input type="text" id="answer" onfocus="{this.value = '';}">
+	<br>
+	<a href="#" onclick="getAnswer();">Отправить</a>
+	<!--рисуем поле первый раз-->
 	<script>
 		initMap();
 		printMap();
 	</script>
-	<br>
-	<input type="text" id="answer">
-	<br>
-	<a href="#" onclick="getAnswer();">Отправить</a>
 
 </body>
 
